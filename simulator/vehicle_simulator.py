@@ -1,27 +1,25 @@
 import time
 import random
+import requests
 from datetime import datetime
 
-# Initial values
+API_URL = "http://localhost:3000/telemetry"
+
 speed = 0.0
-latitude = 50.8321      # Example: Chemnitz
+latitude = 50.8321
 longitude = 12.9214
 
-print("Starting vehicle telemetry simulator...\n")
+print("Vehicle telemetry simulator started...\n")
 
 while True:
-    # Speed changes smoothly
     speed += random.uniform(-5, 5)
-    speed = max(0, min(speed, 140))  # 0–140 km/h
+    speed = max(0, min(speed, 140))
 
-    # RPM depends on speed
     rpm = int(speed * 40 + random.randint(-300, 300))
     rpm = max(800, rpm)
 
-    # Engine temperature
     engine_temp = 70 + speed * 0.2 + random.uniform(-2, 2)
 
-    # GPS movement
     latitude += random.uniform(-0.0003, 0.0003)
     longitude += random.uniform(-0.0003, 0.0003)
 
@@ -34,6 +32,10 @@ while True:
         "longitude": round(longitude, 6)
     }
 
-    print(telemetry_data)
+    try:
+        response = requests.post(API_URL, json=telemetry_data)
+        print("Sent:", telemetry_data, "| Status:", response.status_code)
+    except Exception as e:
+        print("Error sending data:", e)
 
     time.sleep(2)
