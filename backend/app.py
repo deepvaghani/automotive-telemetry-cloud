@@ -1,10 +1,14 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from datetime import datetime
 
 app = Flask(__name__)
 
 # Store latest telemetry data (in-memory for now)
 latest_telemetry = {}
+
+@app.route("/")
+def dashboard():
+    return render_template("index.html")
 
 @app.route("/telemetry", methods=["POST"])
 def receive_telemetry():

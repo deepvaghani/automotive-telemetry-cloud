@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Automotive Telemetry Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f2027;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            padding: 40px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.12);
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .value {
+            font-size: 36px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .label {
+            font-size: 16px;
+            opacity: 0.8;
+        }
+
+        .footer {
+            text-align: center;
+            opacity: 0.7;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🚗 Automotive Telemetry Dashboard</h1>
+
+<div class="dashboard">
+    <div class="card">
+        <div class="label">Speed</div>
+        <div class="value" id="speed">-- km/h</div>
+    </div>
+
+    <div class="card">
+        <div class="label">RPM</div>
+        <div class="value" id="rpm">--</div>
+    </div>
+
+    <div class="card">
+        <div class="label">Engine Temperature</div>
+        <div class="value" id="temp">-- °C</div>
+    </div>
+
+    <div class="card">
+        <div class="label">Latitude</div>
+        <div class="value" id="lat">--</div>
+    </div>
+
+    <div class="card">
+        <div class="label">Longitude</div>
+        <div class="value" id="lon">--</div>
+    </div>
+</div>
+
+<div class="footer">
+    Live vehicle telemetry · Cloud & Automotive Project
+</div>
+
+<script>
+async function fetchTelemetry() {
+    try {
+        const response = await fetch("/telemetry");
+        const data = await response.json();
+
+        document.getElementById("speed").innerText = data.speed_kmh + " km/h";
+        document.getElementById("rpm").innerText = data.rpm;
+        document.getElementById("temp").innerText = data.engine_temp_c + " °C";
+        document.getElementById("lat").innerText = data.latitude;
+        document.getElementById("lon").innerText = data.longitude;
+    } catch (error) {
+        console.log("Waiting for telemetry...");
+    }
+}
+
+setInterval(fetchTelemetry, 2000);
+fetchTelemetry();
+</script>
+
+</body>
+</html>
