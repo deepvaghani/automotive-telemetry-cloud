@@ -48,17 +48,30 @@ jobs:
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
+          set -e
+
+          echo "Creating network if not exists"
+          docker network inspect telemetry-net >/dev/null 2>&1 || docker network create telemetry-net
+
+          echo "Pulling images"
           docker pull ${{ secrets.DOCKER_USERNAME }}/telemetry-dashboard:latest
           docker pull ${{ secrets.DOCKER_USERNAME }}/telemetry-simulator:latest
 
-          docker stop telemetry || true
-          docker rm telemetry || true
+          echo "Stopping old containers"
+          docker stop telemetry telemetry-simulator || true
+          docker rm telemetry telemetry-simulator || true
 
-          docker stop telemetry-simulator || true
-          docker rm telemetry-simulator || true
-
-          docker run -d -p 3000:3000 --name telemetry \
+          echo "Starting backend"
+          docker run -d \
+            --name telemetry \
+            --network telemetry-net \
+            -p 3000:3000 \
             ${{ secrets.DOCKER_USERNAME }}/telemetry-dashboard:latest
 
-          docker run -d --name telemetry-simulator --network telemetry-net -e BACKEND_URL=http://telemetry:3000/telemetry \
+          echo "Starting simulator"
+          docker run -d \
+            --name telemetry-simulator \
+            --network telemetry-net \
+            -e BACKEND_URL=http://telemetry:3000/telemetry \
             ${{ secrets.DOCKER_USERNAME }}/telemetry-simulator:latest
+
