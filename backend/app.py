@@ -12,14 +12,18 @@ def dashboard():
 
 @app.route("/telemetry", methods=["POST"])
 def receive_telemetry():
-    global latest_telemetry
+    global latest_data
     data = request.json
 
-    # Add server-side timestamp
-    data["received_at"] = datetime.utcnow().isoformat()
-    latest_telemetry = data
-
-    return jsonify({"status": "telemetry received"}), 200
+    latest_telemetry = {
+        "speed": data.get("speed_kmh"),
+        "rpm": data.get("rpm"),
+        "engine_temp": data.get("engine_temp_c"),
+        "lat": data.get("latitude"),
+        "lon": data.get("longitude"),
+        "received_at": data.get("received_at")
+    }
+    return {"status": "ok"}
 
 @app.route("/telemetry", methods=["GET"])
 def get_telemetry():
