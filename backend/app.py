@@ -4,7 +4,7 @@ from datetime import datetime
 app = Flask(__name__)
 
 # Store latest telemetry data (in-memory for now)
-latest_telemetry = {}
+latest_data = {}
 
 @app.route("/")
 def dashboard():
@@ -15,7 +15,7 @@ def receive_telemetry():
     global latest_data
     data = request.json
 
-    latest_telemetry = {
+    latest_data = {
         "speed": data.get("speed_kmh"),
         "rpm": data.get("rpm"),
         "engine_temp": data.get("engine_temp_c"),
@@ -27,9 +27,9 @@ def receive_telemetry():
 
 @app.route("/telemetry", methods=["GET"])
 def get_telemetry():
-    if not latest_telemetry:
+    if not latest_data:
         return jsonify({"message": "No telemetry received yet"}), 404
-    return jsonify(latest_telemetry), 200
+    return jsonify(latest_data), 200
 
 @app.route("/health", methods=["GET"])
 def health():
