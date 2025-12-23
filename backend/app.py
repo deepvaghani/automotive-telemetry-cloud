@@ -4,7 +4,7 @@ from datetime import datetime
 app = Flask(__name__)
 
 # Store latest telemetry data (in-memory for now)
-latest_data = {}
+latest_telemetry = {}
 
 @app.route("/")
 def dashboard():
@@ -12,24 +12,20 @@ def dashboard():
 
 @app.route("/telemetry", methods=["POST"])
 def receive_telemetry():
-    global latest_data
+    global latest_telemetry
     data = request.json
 
-    latest_data = {
-        "speed": data.get("speed_kmh"),
-        "rpm": data.get("rpm"),
-        "engine_temp": data.get("engine_temp_c"),
-        "lat": data.get("latitude"),
-        "lon": data.get("longitude"),
-        "received_at": data.get("received_at")
-    }
-    return {"status": "ok"}
+    # Add server-side timestamp
+    data["received_at"] = datetime.utcnow().isoformat()
+    latest_telemetry = data
+
+    return jsonify({"status": "telemetry received"}), 200
 
 @app.route("/telemetry", methods=["GET"])
 def get_telemetry():
-    if not latest_data:
+    if not latest_telemetry:
         return jsonify({"message": "No telemetry received yet"}), 404
-    return jsonify(latest_data), 200
+    return jsonify(latest_telemetry), 200
 
 @app.route("/health", methods=["GET"])
 def health():
