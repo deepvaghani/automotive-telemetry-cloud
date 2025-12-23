@@ -18,7 +18,7 @@ while True:
     rpm = int(speed * 40 + random.randint(-300, 300))
     rpm = max(800, rpm)
 
-    engine_temp = 70 + speed * 0.2 + random.uniform(-2, 2)
+    engine_temp = 70 + speed * 0.5 + random.uniform(-2, 2)
 
     latitude += random.uniform(-0.0003, 0.0003)
     longitude += random.uniform(-0.0003, 0.0003)
