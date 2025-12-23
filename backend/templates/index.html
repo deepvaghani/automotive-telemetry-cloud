@@ -227,8 +227,15 @@
 
         async function fetchTelemetry() {
             try {
-                const res = await fetch("/telemetry");
-                const data = await res.json();
+                setInterval(async () => {
+                    const res = await fetch(`/telemetry?ts=${Date.now()}`);
+                    const data = await res.json();
+
+                    console.log("Telemetry:", data); // 👈 ADD THIS dsfsd
+
+                    updateSpeed(data.speed);
+                    updateRpm(data.rpm);
+                }, 1000);
 
                 /* SPEED */
                 document.getElementById("speed").innerText = Math.round(data.speed_kmh);
