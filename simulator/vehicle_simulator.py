@@ -4,7 +4,7 @@ import time
 
 BACKEND_URL = os.getenv(
     "BACKEND_URL",
-    "http://localhost:3000/telemetry"
+    "http://telemetry:3000/telemetry"
 )
 
 while True:
