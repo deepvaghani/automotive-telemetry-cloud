@@ -3,7 +3,7 @@ import random
 import requests
 from datetime import datetime
 
-API_URL = "http://localhost:3000/telemetry"
+API_URL = "http://98.82.133.155:3000/telemetry"
 
 speed = 0.0
 latitude = 50.8321

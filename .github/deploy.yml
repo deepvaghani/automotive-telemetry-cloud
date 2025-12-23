@@ -1,0 +1,64 @@
+name: Telemetry CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    # ---------- Build & Push Backend ----------
+    - name: Build & Push Backend Image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend
+        platforms: linux/amd64
+        push: true
+        tags: ${{ secrets.DOCKER_USERNAME }}/telemetry-dashboard:latest
+
+    # ---------- Build & Push Simulator ----------
+    - name: Build & Push Simulator Image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./simulator
+        platforms: linux/amd64
+        push: true
+        tags: ${{ secrets.DOCKER_USERNAME }}/telemetry-simulator:latest
+
+    # ---------- Deploy to EC2 ----------
+    - name: Deploy on EC2
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          docker pull ${{ secrets.DOCKER_USERNAME }}/telemetry-dashboard:latest
+          docker pull ${{ secrets.DOCKER_USERNAME }}/telemetry-simulator:latest
+
+          docker stop telemetry || true
+          docker rm telemetry || true
+
+          docker stop telemetry-simulator || true
+          docker rm telemetry-simulator || true
+
+          docker run -d -p 5000:5000 --name telemetry \
+            ${{ secrets.DOCKER_USERNAME }}/telemetry-dashboard:latest
+
+          docker run -d --name telemetry-simulator \
+            ${{ secrets.DOCKER_USERNAME }}/telemetry-simulator:latest
