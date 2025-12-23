@@ -60,5 +60,5 @@ jobs:
           docker run -d -p 3000:3000 --name telemetry \
             ${{ secrets.DOCKER_USERNAME }}/telemetry-dashboard:latest
 
-          docker run -d --name telemetry-simulator \ --network telemetry-net \ -e BACKEND_URL=http://telemetry:3000/telemetry \
+          docker run -d --name telemetry-simulator --network telemetry-net -e BACKEND_URL=http://telemetry:3000/telemetry \
             ${{ secrets.DOCKER_USERNAME }}/telemetry-simulator:latest
