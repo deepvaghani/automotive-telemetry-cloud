@@ -153,7 +153,7 @@ async function fetchTelemetry() {
 
     // Update map
     marker.setLatLng([data.lat, data.lon]);
-    map.panTo([data.lat, data.lon], { animate: true });
+    map.panTo([data.latitude, data.longitude], { animate: true });
 
   } catch (err) {
     console.error("Telemetry fetch error:", err);
