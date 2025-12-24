@@ -1,54 +1,166 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Telemetry Live Data</title>
-  <style>
-    body {
-      background: #111;
-      color: #00ffcc;
-      font-family: monospace;
-      padding: 20px;
-    }
-    h1 {
-      color: #fff;
-    }
-    pre {
-      background: #000;
-      padding: 15px;
-      border-radius: 8px;
-      font-size: 16px;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Vehicle Telemetry Dashboard</title>
+
+<!-- Leaflet CSS -->
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<style>
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #0e0e0e;
+  color: #ffffff;
+}
+
+/* Layout */
+.dashboard {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 100vh;
+}
+
+/* Left panel */
+.panel {
+  padding: 30px;
+  display: grid;
+  grid-template-rows: repeat(4, auto);
+  gap: 20px;
+  background: linear-gradient(180deg, #111, #000);
+}
+
+/* Info cards */
+.card {
+  background: #151515;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 0 15px rgba(0,255,200,0.15);
+}
+
+.card h2 {
+  margin: 0;
+  font-size: 16px;
+  opacity: 0.7;
+}
+
+.card .value {
+  font-size: 36px;
+  margin-top: 8px;
+  font-weight: bold;
+  color: #00ffcc;
+}
+
+/* Map */
+#map {
+  height: 100%;
+  width: 100%;
+}
+
+/* Footer */
+.footer {
+  position: absolute;
+  bottom: 10px;
+  width: 100%;
+  text-align: center;
+  font-size: 12px;
+  opacity: 0.5;
+}
+</style>
 </head>
+
 <body>
 
-<h1>🚗 Live Telemetry Data</h1>
+<div class="dashboard">
 
-<pre id="telemetry">Waiting for data...</pre>
+  <!-- LEFT PANEL -->
+  <div class="panel">
+
+    <div class="card">
+      <h2>Speed</h2>
+      <div class="value">
+        <span id="speed">--</span> km/h
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>RPM</h2>
+      <div class="value">
+        <span id="rpm">--</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Engine Temperature</h2>
+      <div class="value">
+        <span id="temp">--</span> °C
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Last Update</h2>
+      <div class="value" style="font-size:18px">
+        <span id="time">--</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div id="map"></div>
+
+</div>
+
+<div class="footer">
+  Automotive Telemetry Dashboard · Cloud & DevOps Project
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
+/* Initialize map */
+let map = L.map('map').setView([50.8321, 12.9214], 15);
+let marker = L.marker([50.8321, 12.9214]).addTo(map);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19
+}).addTo(map);
+
+/* Fetch telemetry */
 async function fetchTelemetry() {
   try {
     const res = await fetch(`/telemetry?ts=${Date.now()}`, {
       cache: "no-store"
     });
-
     const data = await res.json();
 
-    console.log("Telemetry received:", data);
+    console.log("Telemetry:", data);
 
-    document.getElementById("telemetry").innerText =
-      JSON.stringify(data, null, 2);
+    if (data.message) return;
 
-  } catch (error) {
-    console.error("Error fetching telemetry:", error);
-    document.getElementById("telemetry").innerText =
-      "Error fetching telemetry";
+    // Update UI
+    document.getElementById("speed").innerText = data.speed;
+    document.getElementById("rpm").innerText = data.rpm;
+    document.getElementById("temp").innerText = data.engine_temp;
+
+    document.getElementById("time").innerText =
+      new Date(data.received_at).toLocaleTimeString();
+
+    // Update map
+    marker.setLatLng([data.lat, data.lon]);
+    map.panTo([data.lat, data.lon], { animate: true });
+
+  } catch (err) {
+    console.error("Telemetry fetch error:", err);
   }
 }
 
-// Fetch every second
+/* Poll every second */
 setInterval(fetchTelemetry, 1000);
 fetchTelemetry();
 </script>
