@@ -152,7 +152,7 @@ async function fetchTelemetry() {
       new Date(data.received_at).toLocaleTimeString();
 
     // Update map
-    marker.setLatLng([data.lat, data.lon]);
+    marker.setLatLng([data.latitude, data.longitude]);
     map.panTo([data.latitude, data.longitude], { animate: true });
 
   } catch (err) {
