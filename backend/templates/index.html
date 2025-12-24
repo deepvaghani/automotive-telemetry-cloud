@@ -144,9 +144,9 @@ async function fetchTelemetry() {
     if (data.message) return;
 
     // Update UI
-    document.getElementById("speed").innerText = data.speed;
+    document.getElementById("speed").innerText = data.speed_kmh;
     document.getElementById("rpm").innerText = data.rpm;
-    document.getElementById("temp").innerText = data.engine_temp;
+    document.getElementById("temp").innerText = data.engine_temp_c;
 
     document.getElementById("time").innerText =
       new Date(data.received_at).toLocaleTimeString();
